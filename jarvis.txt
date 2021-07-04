@@ -1,0 +1,134 @@
+import pyttsx3
+import speech_recognition as sr
+import datetime
+import wikipedia
+import webbrowser
+import pywhatkit
+import wolframalpha
+import phonenumbers
+import os
+
+from phonenumbers import geocoder
+from phonenumbers import carrier
+
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id)
+client = wolframalpha.Client('HU88RJ-QAYUH9P275')
+
+
+chrome_path = r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path))
+
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+
+def online():
+
+
+    speak('ok sir')
+    speak('starting all system applications')
+    speak('installing all drivers')
+    os.system('start E:/Rainmeter/Rainmeter.exe')
+    speak('every driver is installed')
+    speak('all systems have been started')
+    speak('good to go sir')
+
+def wishMe():
+    online()
+    hour = int(datetime.datetime.now().hour)
+    if hour >= 0 and hour < 12:
+        speak("Good Morning!")
+
+    elif hour >= 12 and hour < 18:
+        speak("Good Afternoon!")
+
+    else:
+        speak("Good Evening!")
+
+    speak("Hi, I am Jarvis. Please tell me how may I help you sir")
+
+
+def takeCommand():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        speak("Listening, You may continue")
+        print("Listening...")
+        audio = r.listen(source)
+
+    try:
+        print("Recognizing...")
+        query = r.recognize_google(audio)
+        print(f"User said: {query}\n")
+
+    except Exception as e:
+
+        speak("Say that again please")
+        print("Say that again please...")
+        return "None"
+    return query
+
+if __name__ == "__main__":
+    wishMe()
+    while True:
+
+        query = takeCommand().lower()
+
+        if 'who is' in query:
+            speak('Searching Wikipedia...')
+            query = query.replace("who is", "")
+            results=wikipedia.summary(query, sentences=2)
+            speak("According to Wikipedia")
+            print(results)
+            speak(results)
+
+        elif 'youtube' in query:
+            speak("Opening Youtube")
+            webbrowser.get('chrome').open_new_tab("youtube.com")
+
+        elif 'open google' in query:
+            speak("Opening Google")
+            webbrowser.get('chrome').open_new_tab("google.com")
+
+        elif 'open amazon prime' in query:
+            speak("Opening Amazon Prime")
+            webbrowser.get('chrome').open_new_tab(
+                "https://www.primevideo.com/?ref_=dvm_pds_amz_in_as_s_g_brand1&ext_vrnc=hi%7Cc_386629063403_m_lgAX6a65-dc_s_")
+
+        elif 'play' in query:
+            song = query.replace('play', '')
+            pywhatkit.playonyt(song)
+
+        elif 'the time' in query:
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")
+            speak(f"Sir, the time is {strTime}")
+
+        elif 'sleep' in query:
+            speak("going to sleep sir. wake me up,when needed.")
+            break
+        elif 'locate a number' in query:
+            speak("Enter the mobile number to be located")
+            num = input("Enter the mobile number: ")
+            ph = phonenumbers.parse(num)
+            results = geocoder.description_for_number(ph, "en")
+            service = carrier.name_for_number(ph, "en")
+            print(results)
+            speak("Number is located in")
+            speak(results)
+            print(service)
+            speak("Service Provider is")
+            speak(service)
+
+        else:
+            query = query
+            speak('Searching...')
+            res = client.query(query)
+            results = next(res.results).text
+            speak('According to google - ')
+            speak(results)
+            print(results)
+
+
+
